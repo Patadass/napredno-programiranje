@@ -62,7 +62,13 @@ class Ad implements Comparable<Ad>{
 
 class SortByTotalScore implements Comparator<Ad>{
     public int compare(Ad a, Ad b){
-        return Double.compare(a.getTotalScore(), b.getTotalScore());
+        return Double.compare(b.getTotalScore(), a.getTotalScore());
+    }
+}
+
+class SortByBid implements Comparator<Ad>{
+    public int compare(Ad a, Ad b){
+        return Double.compare(b.getBid(), a.getBid());
     }
 }
 
@@ -108,19 +114,25 @@ class AdNetwork {
     }
 
     public void readAds(BufferedReader br){
-        Stream<String> stream = br.lines();
-        Consumer<String> add = line -> {
-            String[] a = line.split(" ");
-            StringBuilder cnt = new StringBuilder();
-            for(int i = 4;i < a.length;i++){
-                cnt.append(a[i]);
-                if(i + 1 != a.length){
-                    cnt.append(" ");
+        try{
+            while(br.ready()){
+                String line = br.readLine();
+                String[] a = line.split(" ");
+                if(a.length <= 4){
+                    break;
                 }
+                StringBuilder cnt = new StringBuilder();
+                for(int i = 4;i < a.length;i++){
+                    cnt.append(a[i]);
+                    if(i + 1 != a.length){
+                        cnt.append(" ");
+                    }
+                }
+                ads.add(new Ad(a[0], a[1], cnt.toString(), Double.valueOf(a[2]), Double.valueOf(a[3])));
             }
-            ads.add(new Ad(a[0], a[1], cnt.toString(), Double.valueOf(a[2]), Double.valueOf(a[3])));
-        };
-        stream.forEach(add);
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     public List<Ad> placeAds(BufferedReader is, int k, PrintWriter os){
@@ -142,21 +154,19 @@ class AdNetwork {
             }
         }
         AdRequest adRequest = new AdRequest(id, cat, key_words.toString(), floor_bid);
-        List<Ad> ads = new ArrayList<Ad>();
-        Predicate<Ad> hasLowerBid = ad -> (ad.getBid() < adRequest.getFloor());
-        Consumer<Ad> calcTotalSocre = ad -> ad.setTotalScore(relevanceScore(ad, adRequest) + 5.0 * ad.getBid() + 100.0 * ad.getCtr());
+        Predicate<Ad> hasLowerBid = ad -> (adRequest.getFloor() > ad.getBid());
+        Consumer<Ad> calcTotalSocre = ad -> ad.setTotalScore(relevanceScore(ad, adRequest) + (5.0 * ad.getBid()) + (100.0 * ad.getCtr()));
         ads.removeIf(hasLowerBid);
         ads.forEach(calcTotalSocre);
         ads.sort(new SortByTotalScore());
         List<Ad> top = new ArrayList<Ad>();
         for(int i = 0;i < k;i++){
-            top.add(ads.get(i));
+            top.add(this.ads.get(i));
         }
-        os.print("Top ads for request " + adRequest.getId());
-        for(Ad ad : this.ads){
-            if(top.contains(ad)){
-                os.print(ad.getId() + " " + ad.getCategory() + "(bid=" + ad.getBid() + ", ctr=" + ad.getCtr() + "%)" + ad.getContent());
-            }
+        top.sort(new SortByBid());
+        os.print("Top ads for request " + adRequest.getId() + ":\n");
+        for(Ad ad : top){
+            os.print(ad.getId() + " " + ad.getCategory() + " (bid=" + String.format("%.2f", ad.getBid()) + ", ctr=" + String.format("%.2f", ad.getCtr() * 100) + "%) " + ad.getContent() + "\n");
         }
 
         return top;
