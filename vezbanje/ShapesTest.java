@@ -37,21 +37,21 @@ class Canvas {
         for(int i = 0;i < shapes.size();i++){
             if(shapes.get(i).weight() < s.weight()){
                 if(i - 1 < 0){
-                    shapes.addFirst(s);
+                    shapes.add(0, s);
                     return;
                 }
                 shapes.add(i, s);
                 return;
             }
         }
-        shapes.addLast(s);
+        shapes.add(s);
     }
 
     public void scale(String id, float scaleFactor){
         Shape s = null;
         int pos = 0;
         for(int i = 0;i < shapes.size();i++){
-            if(shapes.get(i).getId() == id){
+            if(shapes.get(i).getId().equals(id)){
                 s = shapes.get(i);
                 pos = i;
                 break;
@@ -64,15 +64,8 @@ class Canvas {
         if(pos - 1 < 0){
             return;
         }
-        if(shapes.get(pos - 1).weight() >= s.weight()){
-            return;
-        }
         shapes.remove(s);
-        for(int i = 1;i < shapes.size();i++){
-            if(shapes.get(i).weight() < s.weight()){
-                shapes.add(i, s);
-            }
-        }
+        this.add(s);
     }
 
     @Override
@@ -126,7 +119,7 @@ class Circle extends Shape{
 
     @Override
     public String toString(){
-        return "C: " + this.id + "   " + this.color.name() + "          " + String.format("%.2f", weight());
+        return String.format("C: %-5s%-10s%10.2f", this.id, this.color.name(), this.weight());
     }
 }
 
@@ -152,7 +145,7 @@ class Rectangle extends Shape{
 
     @Override
     public String toString(){
-        return "R: " + this.id + "   " + this.color.name() + "          " + String.format("%.2f", weight());
+        return String.format("R: %-5s%-10s%10.2f", this.id, this.color.name(), this.weight());
     }
 }
 
