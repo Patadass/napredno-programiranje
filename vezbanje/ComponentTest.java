@@ -103,8 +103,8 @@ class Component{
     public String toString(int step){
         StringBuilder sb = new StringBuilder();
         comps.stream().forEach(a -> {
-            for(int i = 0;i < step*3;i++){
-                sb.append("-");
+            for(int i = 0;i < step;i++){
+                sb.append("---");
             } 
             sb.append(String.format("%d:%s\n", a.weight, a.color));
             sb.append(String.format("%s", a.toString(step+1)));
