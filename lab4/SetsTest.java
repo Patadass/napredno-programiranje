@@ -36,7 +36,7 @@ class SortByAvg implements Comparator<Student>{
             if(Integer.compare(b.grades.size(), a.grades.size()) == 0){
                 return b.id.compareTo(a.id);
             }else{
-                return Integer.compare(a.grades.size(), b.grades.size());
+                return Integer.compare(b.grades.size(), a.grades.size());
             }
         }else{
             return Double.compare(b.avg(), a.avg());
@@ -54,7 +54,7 @@ class SortByPassed implements Comparator<Student>{
                 return Double.compare(b.avg(), a.avg());
             }
         }else{
-            return Integer.compare(a.grades.size(), b.grades.size());
+            return Integer.compare(b.grades.size(), a.grades.size());
         }
     }
 }
@@ -87,15 +87,15 @@ class Faculty{
     }
 
     public Set<Student> getStudentsSortedByAverageGrade(){
-        ArrayList<Student> s = (ArrayList<Student>) students.values().stream().collect(Collectors.toList());
-        s.sort(new SortByAvg());
-        return s.stream().collect(Collectors.toSet());
+        Set<Student> ph = new TreeSet<Student>(new SortByAvg());
+        ph.addAll(students.values());
+        return ph;
     }
 
     public Set<Student> getStudentsSortedByCoursesPassed(){
-        ArrayList<Student> s = (ArrayList<Student>) students.values().stream().collect(Collectors.toList());
-        s.sort(new SortByPassed());
-        return s.stream().collect(Collectors.toSet());
+        Set <Student> ph = new TreeSet<Student>(new SortByPassed());
+        ph.addAll(students.values());
+        return ph;
     }
 }
 
