@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Collections;
 import java.util.*;
+import java.util.TimeZone;
 
 class Scheduler<T>{
     Map<Date, T> map;
@@ -76,6 +77,7 @@ class Scheduler<T>{
 public class SchedulerTest {
 	
 	public static void main(String[] args) {
+	    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 		Scanner jin = new Scanner(System.in);
 		int k = jin.nextInt();
 		if ( k == 0 ) {
@@ -156,3 +158,4 @@ public class SchedulerTest {
 
     
 }
+

@@ -26,7 +26,7 @@ class TermFrequency{
         Scanner sc = new Scanner(in);
         StringBuilder sb = new StringBuilder();
         while(sc.hasNext()){
-            String line = sc.nextLine().toLowerCase().replaceAll("[,\\.\\-()„“]", " ");
+            String line = sc.nextLine().toLowerCase().replaceAll("[,.]", "");
             sb.append(line).append(" ");
         }
         sc.close();
@@ -101,3 +101,4 @@ public class TermFrequencyTest {
 	}
 }
 // vasiot kod ovde
+
