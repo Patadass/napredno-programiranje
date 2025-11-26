@@ -15,7 +15,7 @@ class Scheduler<T>{
         map.put(d, t);
     }
 
-    public boolean remover(Date d){
+    public boolean remove(Date d){
         if(map.containsKey(d)){
             map.remove(d);
             return true;
@@ -33,12 +33,16 @@ class Scheduler<T>{
     }
 
     public T last(){
+        Date ph = null;
         for(Date date : map.keySet()){
-            if(!date.after(new Date())){
-                return map.get(date);
+            if(date.before(new Date())){
+                ph = date;
             }
         }
-        return null;
+        if(ph == null){
+            return null;
+        }
+        return map.get(ph);
     }
 
     public ArrayList<T> getAll(Date begin, Date end){
@@ -53,6 +57,19 @@ class Scheduler<T>{
     }
 
     public T getFirst(){
+        return map.get(map.keySet().iterator().next());
+    }
+
+    public T getLast(){
+        Iterator<Date> i = map.keySet().iterator();
+        if(!i.hasNext()){
+            return null;
+        }
+        Date ph = null;
+        while(i.hasNext()){
+            ph = i.next();
+        }
+        return map.get(ph);
     }
 }
 
