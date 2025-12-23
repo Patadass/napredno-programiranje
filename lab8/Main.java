@@ -1,5 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.BufferedReader; import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -84,7 +83,6 @@ class RoomAction {
     }
 }
 
-
 class GameRoom {
 
     public final String roomId;
@@ -104,7 +102,15 @@ class GameRoom {
     }
 
     private void startProcessor() {
-
+        executor.submit(() -> {
+            while(running){
+                try{
+                    processAction(actionQueue.poll(100, TimeUnit.MILLISECONDS));
+                }catch(InterruptedException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+        });
     }
 
     public void submitAction(PlayerAction action) {
@@ -155,11 +161,19 @@ class GameRoom {
     }
 
     public void shutdown() {
-        // TODO: Add missing logic
+        executor.shutdown();
+        try {
+            if(!executor.awaitTermination(5000, TimeUnit.MILLISECONDS)){
+                executor.shutdownNow();
+            } 
+        }catch(InterruptedException e){
+            executor.shutdownNow();
+        }        
 
         System.out.println("[" + roomId + "] FINAL PLAYERS:");
         players.values().forEach(p ->
                 System.out.println("  " + p));
+        running = false;
     }
 }
 
@@ -181,18 +195,45 @@ class GameServer {
         startDispatcher();
     }
 
-    // TODO: Implement startDispatcher()
     private void startDispatcher() {
-
+        dispatcher.submit(() -> {
+            while(running){
+                RoomAction ra;
+                try{
+                    ra = inputQueue.poll(100, TimeUnit.MILLISECONDS);
+                }catch(InterruptedException e){
+                    ra = inputQueue.poll();
+                    System.out.println(e.getMessage());
+                }
+                GameRoom ga;
+                if(!rooms.containsKey(ra.roomId)){
+                    ga = new GameRoom(ra.roomId);
+                    rooms.put(ra.roomId, ga);
+                }else{
+                    ga = rooms.get(ra.roomId);
+                }
+                ga.submitAction(ra.action);
+            }
+        });
     }
 
     public void submit(String roomId, PlayerAction action) {
         inputQueue.offer(new RoomAction(roomId, action));
     }
 
-    // TODO: Implement GameServer shutdown() method
     public void shutdown() {
-
+        for(GameRoom gr: rooms.values()){
+            gr.shutdown();
+        }
+        dispatcher.shutdown();
+        try {
+            if(!dispatcher.awaitTermination(5000, TimeUnit.MILLISECONDS)){
+                dispatcher.shutdownNow();
+            } 
+        }catch(InterruptedException e){
+            dispatcher.shutdownNow();
+        }        
+        running = false;
     }
 }
 
